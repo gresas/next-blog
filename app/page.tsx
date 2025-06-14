@@ -10,6 +10,13 @@ interface Noticia {
   deck: string
   linhaSuporte: string
   corpo: string
+  createdAt: string
+  updatedAt: string
+}
+
+function formatarData(data: string) {
+  const d = new Date(data)
+  return d.toLocaleDateString('pt-BR')
 }
 
 export default function HomePage() {
@@ -34,6 +41,16 @@ export default function HomePage() {
                   <Typography variant="h5">{noticia.titulo}</Typography>
                   <Typography variant="subtitle1" gutterBottom>{noticia.deck}</Typography>
                   <Typography variant="body2" color="text.secondary">Por {noticia.autor}</Typography>
+
+                  {noticia.updatedAt === noticia.createdAt ? (
+                    <Typography variant="caption" color="text.secondary">
+                      Publicado em {formatarData(noticia.createdAt)}
+                    </Typography>
+                  ) : (
+                    <Typography variant="caption" color="text.secondary">
+                      Atualizado em {formatarData(noticia.updatedAt)}
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
           </Link>

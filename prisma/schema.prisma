@@ -14,6 +14,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Autor {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  cidade    String
+  idade     Int
+  profissao String
+  noticias  Noticia[]
+}
+
 model Noticia {
   id            Int      @id @default(autoincrement())
   titulo        String
@@ -22,4 +31,8 @@ model Noticia {
   linhaSuporte  String
   corpo         String
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  firstPublishAt DateTime @default(now())
+  createdBy     Autor?   @relation(fields: [createdById], references: [id])
+  createdById   Int?
 }
