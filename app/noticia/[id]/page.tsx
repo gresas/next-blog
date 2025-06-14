@@ -55,7 +55,7 @@ export default function PaginaNoticia() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 6 }}>
+    <Container maxWidth="md" sx={{ mt: 4, mb: 6, pt: 7 }}>
       <Chip
         label={noticia.linhaSuporte}
         color="secondary"

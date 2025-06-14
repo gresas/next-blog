@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               justifyContent: 'space-between',
             }}
           >
-          <main style={{ flexGrow: 1, paddingBottom: '150px' }}>
+          <main style={{ flexGrow: 1, paddingBottom: '50px' }}>
             {children}
           </main>
             <div style={{ marginTop: '100px' }}>

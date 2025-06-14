@@ -4,43 +4,45 @@ import {
   Container,
   Typography,
   Grid,
-  Card,
-  CardContent,
   Button,
   CircularProgress 
 } from '@mui/material'
 import NewsCard from './components/NewsCard'
 
 
-interface Noticia {
-  id: number
+type Noticia = {
+  id: string
   titulo: string
-  autor: string
   deck: string
-  linhaSuporte: string
-  corpo: string
-  createdAt: string
   updatedAt: string
+  createdAt: string
+  linhaSuporte: string
+  firstPublishAt: string
+  autor: string
+  createdBy?: {
+    nome: string
+  }
 }
 
-function formatarData(data: string) {
-  const d = new Date(data)
-  return d.toLocaleDateString('pt-BR')
-}
 
 export default function HomePage() {
-  const [noticias, setNoticias] = useState<any[]>([])
+  const [noticias, setNoticias] = useState<Noticia[]>([])
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   const fetchNoticias = async (page: number) => {
-    setLoading(true)
-    const res = await fetch(`/api/noticias?page=${page}`)
-    const data = await res.json()
-    setNoticias(prev => [...prev, ...data.noticias])
-    setHasMore((page * 10) < data.total)
-    setLoading(false)
+    setLoading(true);
+    const res = await fetch(`/api/noticias?page=${page}`);
+    const data = await res.json();
+    setNoticias(prev => [...prev, ...data.noticias]);
+    setHasMore((page * 10) < data.total);
+    setLoading(false);
+
+    if (!initialLoadDone) {
+      setInitialLoadDone(true);
+    }
   }
 
   useEffect(() => {
@@ -54,11 +56,11 @@ export default function HomePage() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, pt: 7 }}>
       <Typography variant="h4" gutterBottom>Últimas Notícias</Typography>
       <Grid container spacing={3}>
         {noticias.map(noticia => (
-          <Grid size={{ xs: 12, md:6 }} key={noticia.id}>
+          <Grid size={{ xs: 12, sm: 6 }} key={noticia.id}>
             <NewsCard noticia={noticia} />
           </Grid>
         ))}
@@ -70,7 +72,7 @@ export default function HomePage() {
         </Grid>
       )}
 
-      {hasMore && !loading && (
+      {initialLoadDone && hasMore && !loading && (
         <Grid container justifyContent="center" sx={{ mt: 4 }}>
           <Button variant="contained" onClick={handleLoadMore}>
             Carregar mais
