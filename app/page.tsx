@@ -1,7 +1,16 @@
 'use client'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { Container, Typography, Grid, Card, CardContent } from '@mui/material'
+import { 
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  CircularProgress 
+} from '@mui/material'
+import NewsCard from './components/NewsCard'
+
 
 interface Noticia {
   id: number
@@ -20,43 +29,62 @@ function formatarData(data: string) {
 }
 
 export default function HomePage() {
-  const [noticias, setNoticias] = useState<Noticia[]>([])
+  const [noticias, setNoticias] = useState<any[]>([])
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+
+  const fetchNoticias = async (page: number) => {
+    setLoading(true)
+    const res = await fetch(`/api/noticias?page=${page}`)
+    const data = await res.json()
+    setNoticias(prev => [...prev, ...data.noticias])
+    setHasMore((page * 10) < data.total)
+    setLoading(false)
+  }
 
   useEffect(() => {
-    fetch('/api/noticias')
-      .then(res => res.json())
-      .then(setNoticias)
+    fetchNoticias(1)
   }, [])
 
+  const handleLoadMore = () => {
+    const nextPage = page + 1
+    setPage(nextPage)
+    fetchNoticias(nextPage)
+  }
+
   return (
-    <Container sx={{ mt: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>Últimas Notícias</Typography>
       <Grid container spacing={3}>
         {noticias.map(noticia => (
           <Grid size={{ xs: 12, md:6 }} key={noticia.id}>
-          <Link href={`/noticia/${noticia.id}`} passHref style={{ textDecoration: 'none' }}>
-            <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="subtitle2" color="secondary">{noticia.linhaSuporte}</Typography>
-                  <Typography variant="h5">{noticia.titulo}</Typography>
-                  <Typography variant="subtitle1" gutterBottom>{noticia.deck}</Typography>
-                  <Typography variant="body2" color="text.secondary">Por {noticia.autor}</Typography>
-
-                  {noticia.updatedAt === noticia.createdAt ? (
-                    <Typography variant="caption" color="text.secondary">
-                      Publicado em {formatarData(noticia.createdAt)}
-                    </Typography>
-                  ) : (
-                    <Typography variant="caption" color="text.secondary">
-                      Atualizado em {formatarData(noticia.updatedAt)}
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
-          </Link>
+            <NewsCard noticia={noticia} />
           </Grid>
         ))}
       </Grid>
+
+      {loading && (
+        <Grid container justifyContent="center" sx={{ mt: 2 }}>
+          <CircularProgress />
+        </Grid>
+      )}
+
+      {hasMore && !loading && (
+        <Grid container justifyContent="center" sx={{ mt: 4 }}>
+          <Button variant="contained" onClick={handleLoadMore}>
+            Carregar mais
+          </Button>
+        </Grid>
+      )}
+
+      {!hasMore && noticias.length > 0 && (
+        <Grid container justifyContent="center" sx={{ mt: 4 }}>
+          <Typography variant="body2" color="text.secondary">
+            Todas as notícias foram carregadas.
+          </Typography>
+        </Grid>
+      )}
     </Container>
   )
 }
