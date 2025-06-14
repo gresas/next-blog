@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Container, Typography, Grid, Card, CardContent } from '@mui/material'
 
@@ -26,14 +27,16 @@ export default function HomePage() {
       <Grid container spacing={3}>
         {noticias.map(noticia => (
           <Grid size={{ xs: 12, md:6 }} key={noticia.id}>
+          <Link href={`/noticia/${noticia.id}`} passHref style={{ textDecoration: 'none' }}>
             <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography variant="subtitle2" color="secondary">{noticia.linhaSuporte}</Typography>
-                <Typography variant="h5">{noticia.titulo}</Typography>
-                <Typography variant="subtitle1" gutterBottom>{noticia.deck}</Typography>
-                <Typography variant="body2" color="text.secondary">Por {noticia.autor}</Typography>
-              </CardContent>
-            </Card>
+                <CardContent>
+                  <Typography variant="subtitle2" color="secondary">{noticia.linhaSuporte}</Typography>
+                  <Typography variant="h5">{noticia.titulo}</Typography>
+                  <Typography variant="subtitle1" gutterBottom>{noticia.deck}</Typography>
+                  <Typography variant="body2" color="text.secondary">Por {noticia.autor}</Typography>
+                </CardContent>
+              </Card>
+          </Link>
           </Grid>
         ))}
       </Grid>
