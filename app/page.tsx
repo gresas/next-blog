@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Container, Typography, Card, CardContent } from '@mui/material'
+import { Container, Typography, Grid, Card, CardContent } from '@mui/material'
 
 interface Noticia {
   id: number
@@ -21,18 +21,22 @@ export default function HomePage() {
   }, [])
 
   return (
-    <Container>
-      <Typography variant="h3" gutterBottom>Notícias</Typography>
-      {noticias.map(noticia => (
-        <Card key={noticia.id} sx={{ mb: 2 }}>
-          <CardContent>
-            <Typography variant="h6">{noticia.linhaSuporte}</Typography>
-            <Typography variant="h4">{noticia.titulo}</Typography>
-            <Typography variant="subtitle1">{noticia.deck}</Typography>
-            <Typography variant="body2">Por {noticia.autor}</Typography>
-          </CardContent>
-        </Card>
-      ))}
+    <Container sx={{ mt: 4 }}>
+      <Typography variant="h4" gutterBottom>Últimas Notícias</Typography>
+      <Grid container spacing={3}>
+        {noticias.map(noticia => (
+          <Grid size={{ xs: 12, md:6 }} key={noticia.id}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent>
+                <Typography variant="subtitle2" color="secondary">{noticia.linhaSuporte}</Typography>
+                <Typography variant="h5">{noticia.titulo}</Typography>
+                <Typography variant="subtitle1" gutterBottom>{noticia.deck}</Typography>
+                <Typography variant="body2" color="text.secondary">Por {noticia.autor}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </Container>
   )
 }

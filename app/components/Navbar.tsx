@@ -7,7 +7,7 @@ export default function Navbar() {
     <AppBar position="static" color="primary">
       <Toolbar>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          GloboNews Blog
+          Rondon's Blog
         </Typography>
         <Box>
           <Button color="inherit" component={Link} href="/">Início</Button>
