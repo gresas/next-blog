@@ -3,7 +3,6 @@
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../app/generated/prisma"
@@ -14,25 +13,86 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Autor {
-  id        Int       @id @default(autoincrement())
-  nome      String
-  cidade    String
-  idade     Int
-  profissao String
-  noticias  Noticia[]
+model Usuario {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  email       String   @unique
+  senhaHash   String
+  role        Role     @default(USER)
+  createdAt   DateTime @default(now())
+  noticias    Noticia[]
+  comentarios Comentarios[]
+  perfil      Perfil?
+}
+
+model Perfil {
+  id     Int       @id @default(autoincrement())
+  bio    String
+  user   Usuario   @relation(fields: [userId], references: [id])
+  userId Int       @unique
 }
 
 model Noticia {
-  id            Int      @id @default(autoincrement())
-  titulo        String
-  autor         String
-  deck          String
-  linhaSuporte  String
-  corpo         String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  firstPublishAt DateTime @default(now())
-  createdBy     Autor?   @relation(fields: [createdById], references: [id])
-  createdById   Int?
+  id             Int       @id @default(autoincrement())
+  titulo         String
+  autor          String
+  deck           String
+  linhaSuporte   String
+  corpo          String
+  status         StatusNoticia @default(RASCUNHO)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  firstPublishAt DateTime  @default(now())
+  publicado      Boolean?  @default(false)
+  tags           Tag[]     @relation("Tags")
+  createdBy      Usuario   @relation(fields: [createdById], references: [id])
+  createdById    Int
+  editoria       Editoria? @relation(fields: [editoriaId], references: [id])
+  editoriaId     Int?
+  comentarios    Comentarios[]
+}
+
+model Comentarios {
+  id          Int      @id @default(autoincrement())
+  title       String?
+  content     String
+  noticia     Noticia  @relation(fields: [noticiaId], references: [id])
+  noticiaId   Int
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId   Int
+}
+
+model Editoria {
+  id           Int      @id @default(autoincrement())
+  description  String
+  nome         String   @unique
+  slug         String   @unique
+  noticias     Noticia[]
+}
+
+model Tag {
+  id       Int       @id @default(autoincrement())
+  nome     String    @unique
+  noticias Noticia[] @relation("Tags")
+}
+
+
+model Contato {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  email        String   @unique
+  mensagem     String
+}
+
+enum Role {
+  USER
+  EDITOR
+  MODERADOR
+  ADMIN
+}
+
+enum StatusNoticia {
+  RASCUNHO
+  REVISADO
+  PUBLICADO
 }

@@ -22,13 +22,14 @@ export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const dropdownOpen = Boolean(anchorEl)
 
+  const menuRef = useRef<HTMLDivElement | null>(null)
+
   useEffect(() => {
     function handleScroll() {
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
 
       debounceTimeout.current = setTimeout(() => {
         const currentScrollY = window.scrollY
-
         if (currentScrollY === 0) {
           setShow(true)
         } else if (currentScrollY < lastScrollY.current) {
@@ -46,6 +47,27 @@ export default function Navbar() {
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
     }
   }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setAnchorEl(null)
+      }
+    }
+
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [dropdownOpen])
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget)
@@ -97,9 +119,10 @@ export default function Navbar() {
           </Box>
         </Toolbar>
 
-        {/* Dropdown quadrado com botões quadrados */}
+        {/* Dropdown quadrado */}
         <Popper open={dropdownOpen} anchorEl={anchorEl} placement="bottom-start" disablePortal>
           <Paper
+            ref={menuRef}
             elevation={6}
             sx={{
               width: 256,
@@ -112,7 +135,7 @@ export default function Navbar() {
               p: 1
             }}
           >
-            {[
+            {[ 
               { label: 'Início', href: '/' },
               { label: 'Editor', href: '/editor' },
               { label: 'Usuário', href: '/user' },

@@ -1,28 +1,71 @@
-import { PrismaClient } from '../app/generated/prisma/client.js'
+import { PrismaClient, Role, StatusNoticia } from '../app/generated/prisma/client.js'
+import bcrypt from 'bcrypt'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // Criar autores
-  const autores = await prisma.autor.createMany({
-    data: [
-      { nome: 'Mariana Silva', cidade: 'São Paulo', idade: 34, profissao: 'Jornalista' },
-      { nome: 'Carlos Mendes', cidade: 'Rio de Janeiro', idade: 45, profissao: 'Editor' },
-      { nome: 'Ana Costa', cidade: 'Belo Horizonte', idade: 29, profissao: 'Repórter' },
-      { nome: 'João Rocha', cidade: 'Porto Alegre', idade: 38, profissao: 'Colunista' },
-      { nome: 'Luciana Brito', cidade: 'Curitiba', idade: 41, profissao: 'Analista de Dados' },
-    ]
-  })
+  // Criar editorias
+  const editoriasData = [
+    { nome: 'Política', description: 'Notícias sobre política nacional e internacional', slug: 'politica' },
+    { nome: 'Tecnologia', description: 'Avanços e notícias do mundo da tecnologia', slug: 'tecnologia' },
+    { nome: 'Meio Ambiente', description: 'Notícias ambientais e clima', slug: 'meio-ambiente' },
+    { nome: 'Economia', description: 'Mercado e economia', slug: 'economia' },
+    { nome: 'Cultura', description: 'Eventos culturais e artes', slug: 'cultura' },
+  ]
 
-  const autoresCadastrados = await prisma.autor.findMany()
+  const editorias = []
+  for (const e of editoriasData) {
+    const ed = await prisma.editoria.create({ data: e })
+    editorias.push(ed)
+  }
 
-  const noticias = [
+  // Criar tags
+  const tagsData = ['Política', 'Saúde', 'Tecnologia', 'Economia', 'Cultura', 'Esportes', 'Meio Ambiente']
+  const tags = []
+  for (const nome of tagsData) {
+    const tag = await prisma.tag.create({ data: { nome } })
+    tags.push(tag)
+  }
+
+  // Criar usuários com perfil
+  const usuariosData = [
+    { nome: 'Mariana Silva', email: 'mariana@exemplo.com', senha: 'senha123', role: Role.EDITOR, bio: 'Jornalista com 10 anos de experiência' },
+    { nome: 'Carlos Mendes', email: 'carlos@exemplo.com', senha: 'senha123', role: Role.EDITOR, bio: 'Editor-chefe focado em tecnologia' },
+    { nome: 'Ana Costa', email: 'ana@exemplo.com', senha: 'senha123', role: Role.EDITOR, bio: 'Repórter ambiental apaixonada' },
+    { nome: 'João Rocha', email: 'joao@exemplo.com', senha: 'senha123', role: Role.EDITOR, bio: 'Colunista de economia' },
+    { nome: 'Luciana Brito', email: 'luciana@exemplo.com', senha: 'senha123', role: Role.EDITOR, bio: 'Analista cultural' },
+  ]
+
+  const usuarios = []
+  for (const u of usuariosData) {
+    const senhaHash = await bcrypt.hash(u.senha, 10)
+    const usuario = await prisma.usuario.create({
+      data: {
+        nome: u.nome,
+        email: u.email,
+        senhaHash,
+        role: u.role,
+        perfil: {
+          create: { bio: u.bio }
+        }
+      },
+      include: { perfil: true }
+    })
+    usuarios.push(usuario)
+  }
+
+  // Criar notícias com ligação a usuário, editoria e tags
+  const noticiasData = [
     {
       titulo: 'Eleições 2025: Cenário político começa a se desenhar',
       autor: 'Mariana Silva',
       deck: 'Especialistas analisam os primeiros movimentos dos pré-candidatos.',
       linhaSuporte: 'Política',
       corpo: 'Os bastidores políticos estão cada vez mais agitados à medida que as eleições se aproximam...',
+      status: StatusNoticia.PUBLICADO,
+      publicado: true,
+      editoriaNome: 'Política',
+      tagNomes: ['Política']
     },
     {
       titulo: 'Inteligência Artificial revoluciona a medicina brasileira',
@@ -30,6 +73,10 @@ async function main() {
       deck: 'Novas tecnologias ajudam na detecção precoce de doenças.',
       linhaSuporte: 'Tecnologia',
       corpo: 'Com o avanço dos algoritmos de machine learning, médicos conseguem prever padrões com mais precisão...',
+      status: StatusNoticia.PUBLICADO,
+      publicado: true,
+      editoriaNome: 'Tecnologia',
+      tagNomes: ['Tecnologia', 'Saúde']
     },
     {
       titulo: 'Clima: Brasil enfrentará inverno mais seco dos últimos anos',
@@ -37,62 +84,19 @@ async function main() {
       deck: 'Meteorologistas alertam para impactos em plantações.',
       linhaSuporte: 'Meio Ambiente',
       corpo: 'O fenômeno climático La Niña contribui para a redução das chuvas em diversas regiões...',
-    },
-    {
-      titulo: 'Mercado de trabalho aquece no setor de TI',
-      autor: 'João Rocha',
-      deck: 'Startups lideram a contratação de profissionais de tecnologia.',
-      linhaSuporte: 'Economia',
-      corpo: 'Empresas de tecnologia vêm liderando a retomada econômica com ofertas de trabalho remoto...',
-    },
-    {
-      titulo: 'Carnaval 2025 será descentralizado em capitais brasileiras',
-      autor: 'Luciana Brito',
-      deck: 'Prefeituras apostam em blocos menores e eventos locais.',
-      linhaSuporte: 'Cultura',
-      corpo: 'A proposta visa evitar superlotações e ampliar a participação em bairros periféricos...',
-    },
-    {
-      titulo: 'Vacinação contra gripe alcança 85% da população-alvo',
-      autor: 'Mariana Silva',
-      deck: 'Campanha do Ministério da Saúde supera expectativas.',
-      linhaSuporte: 'Saúde',
-      corpo: 'A cobertura vacinal atingiu índices históricos, reduzindo internações em todo o país...',
-    },
-    {
-      titulo: 'Novas regras para empréstimos estudantis entram em vigor',
-      autor: 'Carlos Mendes',
-      deck: 'Governo altera taxas e amplia prazo de pagamento.',
-      linhaSuporte: 'Educação',
-      corpo: 'O programa FIES passará a ter novas diretrizes para facilitar o acesso ao ensino superior...',
-    },
-    {
-      titulo: 'Fluminense vence clássico com gol nos acréscimos',
-      autor: 'Ana Costa',
-      deck: 'Partida eletrizante no Maracanã emociona torcedores.',
-      linhaSuporte: 'Esportes',
-      corpo: 'O gol decisivo saiu aos 48 do segundo tempo, garantindo vitória suada para o tricolor...',
-    },
-    {
-      titulo: 'Exposição de arte digital atrai milhares em SP',
-      autor: 'João Rocha',
-      deck: 'Mostra reúne obras de artistas de 12 países.',
-      linhaSuporte: 'Arte & Cultura',
-      corpo: 'A mostra “Pixels em Movimento” celebra o encontro entre tecnologia e expressão artística...',
-    },
-    {
-      titulo: 'Nova política de transporte busca integrar bicicletas e ônibus',
-      autor: 'Luciana Brito',
-      deck: 'Capitais adotam ciclovias e bicicletários próximos a terminais.',
-      linhaSuporte: 'Cidades',
-      corpo: 'Com a proposta de mobilidade sustentável, a integração já começa a surtir efeito na rotina urbana...',
+      status: StatusNoticia.REVISADO,
+      publicado: false,
+      editoriaNome: 'Meio Ambiente',
+      tagNomes: ['Meio Ambiente']
     },
   ]
 
-  // Criar notícias associando com autores reais
-  for (const noticia of noticias) {
-    const autor = autoresCadastrados.find(a => a.nome === noticia.autor)
-    if (!autor) continue
+  for (const noticia of noticiasData) {
+    const usuario = usuarios.find(u => u.nome === noticia.autor)
+    const editoria = editorias.find(e => e.nome === noticia.editoriaNome)
+    const noticiaTags = tags.filter(t => noticia.tagNomes.includes(t.nome))
+
+    if (!usuario) continue
 
     await prisma.noticia.create({
       data: {
@@ -101,19 +105,45 @@ async function main() {
         deck: noticia.deck,
         linhaSuporte: noticia.linhaSuporte,
         corpo: noticia.corpo,
-        firstPublishAt: new Date(),
-        createdById: autor.id,
-      },
+        status: noticia.status,
+        publicado: noticia.publicado,
+        createdById: usuario.id,
+        editoriaId: editoria?.id,
+        tags: {
+          connect: noticiaTags.map(t => ({ id: t.id }))
+        }
+      }
     })
   }
 
-  console.log('Seed concluído com sucesso!')
+  // Criar comentários
+  const noticiasCriadas = await prisma.noticia.findMany()
+  const usuarioComentario = usuarios[0]
+  if (noticiasCriadas.length > 0 && usuarioComentario) {
+    await prisma.comentarios.create({
+      data: {
+        title: 'Muito bom!',
+        content: 'Excelente matéria, muito informativa.',
+        noticiaId: noticiasCriadas[0].id,
+        usuarioId: usuarioComentario.id
+      }
+    })
+  }
 
+  // Criar contatos
+  const contatosData = [
+    { nome: 'Visitante 1', email: 'visitante1@email.com', mensagem: 'Gostei muito do site!' },
+    { nome: 'Visitante 2', email: 'visitante2@email.com', mensagem: 'Tenho uma dúvida sobre uma notícia.' }
+  ]
+  for (const c of contatosData) {
+    await prisma.contato.create({ data: c })
+  }
+
+  console.log('Seed concluído com sucesso!')
 }
 
-
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error(e)
     process.exit(1)
   })
