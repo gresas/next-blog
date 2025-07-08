@@ -1,12 +1,26 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { AppBar, Toolbar, Typography, Button, Box, Slide } from '@mui/material'
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Slide,
+  IconButton,
+  Popper,
+  Paper
+} from '@mui/material'
+import MenuIcon from '@mui/icons-material/Menu'
 import Link from 'next/link'
 
 export default function Navbar() {
   const [show, setShow] = useState(true)
   const lastScrollY = useRef(0)
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const dropdownOpen = Boolean(anchorEl)
 
   useEffect(() => {
     function handleScroll() {
@@ -23,7 +37,7 @@ export default function Navbar() {
           setShow(false)
         }
         lastScrollY.current = currentScrollY
-      }, 100) // aguarda 100ms para processar scroll
+      }, 100)
     }
 
     window.addEventListener('scroll', handleScroll)
@@ -33,11 +47,32 @@ export default function Navbar() {
     }
   }, [])
 
-  
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget)
+  }
+
   return (
     <Slide appear={false} direction="down" in={show}>
       <AppBar color="primary">
         <Toolbar sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Botão quadrado */}
+          <IconButton
+            onClick={handleMenuClick}
+            sx={{
+              width: 48,
+              height: 48,
+              backgroundColor: 'primary.dark',
+              mr: 2,
+              borderRadius: 0,
+              '&:hover': {
+                backgroundColor: 'primary.main'
+              }
+            }}
+          >
+            <MenuIcon sx={{ color: 'white' }} />
+          </IconButton>
+
+          {/* Logo */}
           <Box sx={{ flexGrow: 1 }}>
             <Link href="/" passHref legacyBehavior>
               <Typography
@@ -50,15 +85,59 @@ export default function Navbar() {
                   '&:hover': { textDecoration: 'underline' }
                 }}
               >
-                Rondon&apos;s Blog
+                Taupe&apos;s Blog
               </Typography>
             </Link>
           </Box>
+
+          {/* Botões principais */}
           <Box>
             <Button color="inherit" component={Link} href="/">Início</Button>
             <Button color="inherit" component={Link} href="/contato">Contato</Button>
           </Box>
         </Toolbar>
+
+        {/* Dropdown quadrado com botões quadrados */}
+        <Popper open={dropdownOpen} anchorEl={anchorEl} placement="bottom-start" disablePortal>
+          <Paper
+            elevation={6}
+            sx={{
+              width: 256,
+              height: 256,
+              mt: 1,
+              backgroundColor: 'background.paper',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 1,
+              p: 1
+            }}
+          >
+            {[
+              { label: 'Início', href: '/' },
+              { label: 'Editor', href: '/editor' },
+              { label: 'Usuário', href: '/user' },
+              { label: 'Contato', href: '/contato' }
+            ].map((item, index) => (
+              <Button
+                key={index}
+                component={Link}
+                href={item.href}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 0,
+                  backgroundColor: 'primary.light',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'primary.main'
+                  }
+                }}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </Paper>
+        </Popper>
       </AppBar>
     </Slide>
   )

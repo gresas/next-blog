@@ -15,7 +15,7 @@ export default function Footer() {
         >
           {/* Esquerda: Nome do criador */}
           <Typography variant="body2" sx={{ minWidth: '33%', textAlign: 'left' }}>
-            Rondon's Blog
+            Taupe
           </Typography>
 
           {/* Centro: Direitos reservados */}
