@@ -2,10 +2,7 @@
 import {
   Card,
   CardContent,
-  Typography,
-  CardActions,
-  Button,
-  Box,
+  Typography
 } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'

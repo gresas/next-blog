@@ -1,4 +1,5 @@
 'use client'
+
 import { useState, useEffect, useRef } from 'react'
 import {
   AppBar,
@@ -8,21 +9,24 @@ import {
   Box,
   Slide,
   IconButton,
-  Popper,
-  Paper
+  Avatar
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import Link from 'next/link'
+import MainMenuDropdown from './MainMenuDropdown'
+import UserMenuDropdown from './UserMenuDropdown'
 
 export default function Navbar() {
   const [show, setShow] = useState(true)
   const lastScrollY = useRef(0)
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
 
+  // Menu principal
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const dropdownOpen = Boolean(anchorEl)
 
-  const menuRef = useRef<HTMLDivElement | null>(null)
+  // Menu usuário
+  const [userAnchorEl, setUserAnchorEl] = useState<null | HTMLElement>(null)
 
   useEffect(() => {
     function handleScroll() {
@@ -48,29 +52,12 @@ export default function Navbar() {
     }
   }, [])
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
-        setAnchorEl(null)
-      }
-    }
-
-    if (dropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [dropdownOpen])
-
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget)
+  }
+
+  const handleUserClick = (event: React.MouseEvent<HTMLElement>) => {
+    setUserAnchorEl(userAnchorEl ? null : event.currentTarget)
   }
 
   return (
@@ -117,50 +104,25 @@ export default function Navbar() {
             <Button color="inherit" component={Link} href="/">Início</Button>
             <Button color="inherit" component={Link} href="/contato">Contato</Button>
           </Box>
-        </Toolbar>
 
-        {/* Dropdown quadrado */}
-        <Popper open={dropdownOpen} anchorEl={anchorEl} placement="bottom-start" disablePortal>
-          <Paper
-            ref={menuRef}
-            elevation={6}
-            sx={{
-              width: 256,
-              height: 256,
-              mt: 1,
-              backgroundColor: 'background.paper',
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 1,
-              p: 1
-            }}
-          >
-            {[ 
-              { label: 'Início', href: '/' },
-              { label: 'Editor', href: '/editor' },
-              { label: 'Usuário', href: '/user' },
-              { label: 'Contato', href: '/contato' }
-            ].map((item, index) => (
-              <Button
-                key={index}
-                component={Link}
-                href={item.href}
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: 0,
-                  backgroundColor: 'primary.light',
-                  color: 'white',
-                  '&:hover': {
-                    backgroundColor: 'primary.main'
-                  }
-                }}
-              >
-                {item.label}
-              </Button>
-            ))}
-          </Paper>
-        </Popper>
+          {/* Ícone usuário */}
+          <Box ml={2}>
+            <IconButton
+              aria-label="Usuário"
+              color="inherit"
+              size="large"
+              onClick={handleUserClick}
+            >
+              <Avatar sx={{ bgcolor: 'secondary.main' }}>
+                <AccountCircleIcon />
+              </Avatar>
+            </IconButton>
+          </Box>
+
+          {/* Dropdowns */}
+          <MainMenuDropdown anchorEl={anchorEl} onClose={() => setAnchorEl(null)} />
+          <UserMenuDropdown anchorEl={userAnchorEl} onClose={() => setUserAnchorEl(null)} />
+        </Toolbar>
       </AppBar>
     </Slide>
   )
