@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useAuth } from '../../context/AuthContext'
 import {
   AppBar,
   Toolbar,
@@ -19,6 +20,7 @@ import UserMenuDropdown from './UserMenuDropdown'
 
 export default function Navbar() {
   const [show, setShow] = useState(true)
+  const { isLoggedIn, user, logout } = useAuth()
   const lastScrollY = useRef(0)
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
 
@@ -121,7 +123,12 @@ export default function Navbar() {
 
           {/* Dropdowns */}
           <MainMenuDropdown anchorEl={anchorEl} onClose={() => setAnchorEl(null)} />
-          <UserMenuDropdown anchorEl={userAnchorEl} onClose={() => setUserAnchorEl(null)} />
+          <UserMenuDropdown 
+            isLoggedIn={isLoggedIn}
+            anchorEl={userAnchorEl}
+            onClose={() => setUserAnchorEl(null)}
+            onLogout={() => logout()}
+          />
         </Toolbar>
       </AppBar>
     </Slide>

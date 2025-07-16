@@ -9,9 +9,10 @@ interface UserMenuDropdownProps {
   anchorEl: HTMLElement | null
   onClose: () => void
   isLoggedIn: boolean
+  onLogout?: () => void
 }
 
-export default function UserMenuDropdown({ anchorEl, onClose, isLoggedIn }: UserMenuDropdownProps) {
+export default function UserMenuDropdown({ anchorEl, onClose, isLoggedIn, onLogout }: UserMenuDropdownProps) {
   const open = Boolean(anchorEl)
   const menuRef = useRef<HTMLDivElement | null>(null)
   const router = useRouter()
@@ -44,7 +45,8 @@ export default function UserMenuDropdown({ anchorEl, onClose, isLoggedIn }: User
     try {
       const res = await fetch('/api/logout', { method: 'POST' })
       if (res.ok) {
-        router.push('/login')
+        onLogout?.() // <- atualiza o estado de login no pai
+        router.push('/')
       } else {
         console.error('Erro ao deslogar')
       }
@@ -52,6 +54,7 @@ export default function UserMenuDropdown({ anchorEl, onClose, isLoggedIn }: User
       console.error('Erro ao deslogar', error)
     }
   }
+
 
   return (
     <Popper open={open} anchorEl={anchorEl} placement="bottom-end" disablePortal sx={{ zIndex: 1200 }}>

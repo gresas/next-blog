@@ -3,6 +3,7 @@ import { ThemeProvider, CssBaseline, createTheme } from '@mui/material'
 import { useEffect } from 'react'
 import Navbar from './components/navbar/Navbar'
 import Footer from './components/Footer'
+import { AuthProvider } from './context/AuthContext'
 
 const theme = createTheme({
   palette: {
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-br">
       <body style={{ margin: 0 }}>
+        <AuthProvider>
         <TokenRefresher />
         <ThemeProvider theme={theme}>
           <CssBaseline />
@@ -58,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
         </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )
