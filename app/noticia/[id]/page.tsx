@@ -1,15 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import {
   Container,
   Typography,
   Box,
+  Button,
   Divider,
   CircularProgress,
   Chip,
 } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 interface Comentario {
   id: number
@@ -32,6 +34,7 @@ interface Noticia {
 
 export default function PaginaNoticia() {
   const params = useParams()
+  const router = useRouter()
   const [noticia, setNoticia] = useState<Noticia | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -65,7 +68,17 @@ export default function PaginaNoticia() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 6, pt: 7 }}>
+    <Container maxWidth="sm" sx={{ mt: 4, mb: 6, pt: 7 }}>
+      <Button
+        onClick={() => router.back()}
+        sx={{ mb: 1, gap: 1, pr: 1 }}
+        startIcon={
+          <ArrowBackIcon sx={{}}/>
+        }
+      >
+        Voltar
+      </Button>
+      <br></br>
       <Chip
         label={noticia.linhaSuporte}
         color="secondary"
