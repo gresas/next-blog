@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '../context/AuthContext'
 import {
   Container,
   TextField,    
@@ -11,7 +12,8 @@ import {
   Autocomplete,
   CircularProgress
 } from '@mui/material'
-
+import { Role } from '../generated/prisma/client'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 interface Editoria {
   id: number
@@ -32,21 +34,14 @@ export default function EditorNoticia() {
   const [loadingEditorias, setLoadingEditorias] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [authChecked, setAuthChecked] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { isLoggedIn, loading, user } = useAuth()
 
-  useEffect(() => {
-    fetch('/api/me')
-      .then(res => {
-      if (res.ok) {
-          setIsAuthenticated(true)
-      } else {
-          router.push('/login')
-      }
-      })
-      .catch(() => router.push('/login'))
-      .finally(() => setAuthChecked(true))
-  }, [])
+  const allowedRoles: Role[] = [Role.EDITOR, Role.MODERADOR, Role.ADMIN]
+
+  if (!isLoggedIn || !user) {
+    router.push('/login')
+    return null
+  }
 
   useEffect(() => {
     fetch('/api/editorias')
@@ -95,7 +90,7 @@ export default function EditorNoticia() {
     }
   }
 
-  if (!authChecked) {
+  if (loading) {
     return (
       <Box display="flex" justifyContent="center" mt={10}>
         <CircularProgress />
@@ -103,7 +98,28 @@ export default function EditorNoticia() {
     )
   }
 
-  if (!isAuthenticated) return null
+  if (!allowedRoles.includes(user.role)) {
+    return (
+      <Container maxWidth="sm" sx={{ mt: 18, mb: 6 }}>
+        <Button
+          onClick={() => router.back()}
+          sx={{ mb: 1, gap: 1, pr: 1 }}
+          startIcon={
+            <ArrowBackIcon sx={{}}/>
+          }
+        >
+          Voltar
+        </Button>
+        <Typography variant="h5" color="error" gutterBottom>
+          Acesso Negado
+        </Typography>
+        <Typography variant="body1">
+          Você não tem permissão para acessar esta página.
+        </Typography>
+      </Container>
+    )
+  }
+
   return (
     <Container maxWidth="sm" sx={{ mt: 4, mb: 6, pt: 7 }}>
       <Typography variant="h4" gutterBottom>

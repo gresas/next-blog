@@ -2,12 +2,13 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { Role } from '../generated/prisma/client'
 
 interface User {
   id: number
   nome: string
   email: string
-  role: string
+  role: Role
 }
 
 interface AuthContextType {
