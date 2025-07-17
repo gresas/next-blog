@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Blog
 
-## Getting Started
+Este é um projeto de blog pessoal desenvolvido com [Next.js](https://nextjs.org), utilizando o App Router, autenticação, temas customizados com Material UI e integração com API para notícias, comentários e contato.
 
-First, run the development server:
+## Funcionalidades
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Cadastro e login de usuários
+- Listagem e visualização de notícias
+- Comentários em notícias
+- Página de contato
+- Layout responsivo com tema personalizado
+- Atualização automática de token de autenticação
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tecnologias Utilizadas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- [Next.js](https://nextjs.org)
+- [React](https://react.dev)
+- [Material UI](https://mui.com)
+- [TypeScript](https://www.typescriptlang.org)
+- API REST interna (rotas em `/app/api`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Como executar
 
-## Learn More
+1. Instale as dependências:
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Acesse [http://localhost:3000](http://localhost:3000) no navegador.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Estrutura do Projeto
 
-## Deploy on Vercel
+- `app/` - Código principal do frontend e rotas de API
+- `app/components/` - Componentes reutilizáveis (Navbar, Footer, NewsCard, etc)
+- `app/context/` - Contextos globais (ex: autenticação)
+- `app/api/` - Rotas de API para autenticação, notícias, comentários, contato
+- `app/hooks/` - Hooks customizados
+- `public/` - Arquivos estáticos
+- `README.md` - Documentação do projeto
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Personalização
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- As cores principais do tema são:
+  - Azul: `#0057B8`
+  - Laranja: `#FF5C00`
+  - Cinza claro: `#F5F5F5`
+- O layout pode ser ajustado em `app/layout.tsx`.
+
+## Contribuição
+
+Sinta-se à vontade para abrir issues ou pull requests para sugerir melhorias ou corrigir bugs.
+
+## Licença
+
+Este projeto é open source sob a licença [MIT](LICENSE).
