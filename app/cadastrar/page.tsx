@@ -12,10 +12,13 @@ import {
   CircularProgress,
 } from '@mui/material'
 
+const senhaSeguraRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/
+
 export default function CadastroPage() {
   const router = useRouter()
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
+  const [touched, setTouched] = useState(false)
   const [senha, setSenha] = useState('')
   const [confirmaSenha, setConfirmaSenha] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -51,6 +54,8 @@ export default function CadastroPage() {
     }
   }
 
+  const isSenhaValida = senhaSeguraRegex.test(senha)
+
   return (
     <Container maxWidth="sm" sx={{ mt: 12 }}>
       <Typography variant="h4" gutterBottom>Cadastro</Typography>
@@ -79,10 +84,17 @@ export default function CadastroPage() {
           type="password"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
+          onBlur={() => setTouched(true)}
           fullWidth
           required
           margin="normal"
+          error={touched && !isSenhaValida}
           disabled={loading}
+          helperText={
+            touched && !isSenhaValida
+              ? 'A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um símbolo.'
+              : ''
+          }
         />
         <TextField
           label="Confirme a senha"
@@ -98,12 +110,12 @@ export default function CadastroPage() {
           type="submit"
           variant="contained"
           color="primary"
-          disabled={loading}
+          disabled={loading || !isSenhaValida}
           fullWidth
           sx={{ mt: 2 }}
         >
           {loading ? <CircularProgress size={24} /> : 'Cadastrar'}
-        </Button>
+      </Button>
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
