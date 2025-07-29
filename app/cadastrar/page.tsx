@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import PasswordToggleAdornment from '../components/PasswordToggleAdornment'
 import {
   Container,
   Typography,
@@ -21,6 +22,8 @@ export default function CadastroPage() {
   const [touched, setTouched] = useState(false)
   const [senha, setSenha] = useState('')
   const [confirmaSenha, setConfirmaSenha] = useState('')
+  const [showSenha, setShowSenha] = useState(false)
+  const [showConfirmaSenha, setShowConfirmaSenha] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -81,7 +84,7 @@ export default function CadastroPage() {
         />
         <TextField
           label="Senha"
-          type="password"
+          type={showSenha ? 'text' : 'password'}
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
           onBlur={() => setTouched(true)}
@@ -95,16 +98,34 @@ export default function CadastroPage() {
               ? 'A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um símbolo.'
               : ''
           }
+          slotProps={{
+            input: {endAdornment :(
+              <PasswordToggleAdornment
+                visible={showSenha}
+                onToggle={() => setShowSenha((prev) => !prev)}
+              />
+              )
+            },
+          }}
         />
         <TextField
           label="Confirme a senha"
-          type="password"
+          type={showConfirmaSenha ? 'text' : 'password'}
           value={confirmaSenha}
           onChange={(e) => setConfirmaSenha(e.target.value)}
           fullWidth
           required
           margin="normal"
           disabled={loading}
+          slotProps={{
+            input: {endAdornment :(
+              <PasswordToggleAdornment
+                visible={showConfirmaSenha}
+                onToggle={() => setShowConfirmaSenha((prev) => !prev)}
+              />
+              )
+            },
+          }}
         />
         <Button
           type="submit"

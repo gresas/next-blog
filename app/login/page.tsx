@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import PasswordToggleAdornment from '../components/PasswordToggleAdornment'
 import {
   Container,
   Typography,
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [senha, setSenha] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showSenha, setShowSenha] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,13 +62,22 @@ export default function LoginPage() {
         />
         <TextField
           label="Senha"
-          type="password"
+          type={showSenha ? 'text' : 'password'}
           required
           fullWidth
           margin="normal"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
           disabled={loading}
+          slotProps={{
+            input: {endAdornment :(
+              <PasswordToggleAdornment
+                visible={showSenha}
+                onToggle={() => setShowSenha((prev) => !prev)}
+              />
+              )
+            },
+          }}
         />
         <Button
           type="submit"
