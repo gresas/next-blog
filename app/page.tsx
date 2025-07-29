@@ -56,7 +56,7 @@ export default function HomePage() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, pt: 7 }}>
+    <Container maxWidth="lg" sx={{ mt: 3, pt: 2 }}>
       <Typography variant="h4" gutterBottom>Últimas Notícias</Typography>
       <Grid container spacing={3}>
         {noticias.map(noticia => (
