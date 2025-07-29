@@ -13,9 +13,13 @@ export async function GET(req: NextRequest) {
   const pageSize = 10
   const skip = (page - 1) * pageSize
 
+  const autorId = searchParams.get('autorId')
+  const where = autorId ? { createdById: parseInt(autorId) } : {}
+
   const noticias = await prisma.noticia.findMany({
     skip,
     take: pageSize,
+    where,
     include: {
       createdBy: true
     },
@@ -24,7 +28,7 @@ export async function GET(req: NextRequest) {
     }
   })
 
-  const total = await prisma.noticia.count()
+  const total = await prisma.noticia.count({ where })
 
   return NextResponse.json({ noticias, total })
 }

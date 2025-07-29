@@ -12,7 +12,7 @@ import {
   Autocomplete,
   CircularProgress
 } from '@mui/material'
-import { Role } from '../generated/prisma/client'
+import privilegeRoles from '../generated/helpers'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 interface Editoria {
@@ -35,8 +35,6 @@ export default function EditorNoticia() {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const { isLoggedIn, loading, user } = useAuth()
-
-  const allowedRoles: Role[] = [Role.EDITOR, Role.MODERADOR, Role.ADMIN]
 
   if (!isLoggedIn || !user) {
     router.push('/login')
@@ -98,7 +96,7 @@ export default function EditorNoticia() {
     )
   }
 
-  if (!allowedRoles.includes(user.role)) {
+  if (!privilegeRoles.includes(user.role)) {
     return (
       <Container maxWidth="sm" sx={{ mt: 18, mb: 6 }}>
         <Button
