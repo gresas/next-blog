@@ -1,7 +1,13 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Button, Paper, Popper } from '@mui/material'
+import {
+  Button,
+  Paper,
+  Popper,
+  Stack,
+  Box
+} from '@mui/material'
 import Link from 'next/link'
 
 interface MainMenuDropdownProps {
@@ -37,46 +43,56 @@ export default function MainMenuDropdown({ anchorEl, onClose }: MainMenuDropdown
   }, [open, anchorEl, onClose])
 
   return (
-    <Popper open={open} anchorEl={anchorEl} placement="bottom-start" disablePortal>
+    <Popper
+      open={open}
+      anchorEl={anchorEl}
+      placement="bottom-start"
+      disablePortal
+      role="menu"
+      style={{ zIndex: 1300 }} // garantir sobreposição correta
+    >
       <Paper
         ref={menuRef}
-        elevation={6}
+        elevation={4}
         sx={{
-          width: 256,
-          height: 256,
           mt: 1,
+          width: '200px',
           backgroundColor: 'background.paper',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 1,
-          p: 1
+          borderRadius: 2,
+          py: 1
         }}
       >
-        {[
-          { label: 'Início', href: '/' },
-          { label: 'Editor', href: '/editor' },
-          { label: 'Usuário', href: '/user' },
-          { label: 'Contato', href: '/contato' }
-        ].map((item, index) => (
-          <Button
-            key={index}
-            component={Link}
-            href={item.href}
-            sx={{
-              width: '100%',
-              height: '100%',
-              borderRadius: 0,
-              backgroundColor: 'primary.light',
-              color: 'white',
-              '&:hover': {
-                backgroundColor: 'primary.main'
-              }
-            }}
-            onClick={onClose}
-          >
-            {item.label}
-          </Button>
-        ))}
+        <Stack spacing={1}>
+          {[
+            { label: 'Início', href: '/' },
+            { label: 'Editor', href: '/editor' },
+            { label: 'Usuário', href: '/user' },
+            { label: 'Contato', href: '/contato' }
+          ].map((item, index) => (
+            <Box key={index} role="menuitem">
+              <Button
+                component={Link}
+                href={item.href}
+                fullWidth
+                onClick={onClose}
+                sx={{
+                  justifyContent: 'flex-start',
+                  px: 2,
+                  py: 1.5,
+                  color: 'text.primary',
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  '&:hover': {
+                    backgroundColor: 'primary.light',
+                    color: 'white'
+                  }
+                }}
+              >
+                {item.label}
+              </Button>
+            </Box>
+          ))}
+        </Stack>
       </Paper>
     </Popper>
   )

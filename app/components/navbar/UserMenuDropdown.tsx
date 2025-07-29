@@ -3,19 +3,17 @@
 import { useEffect, useRef } from 'react'
 import { Button, Paper, Popper } from '@mui/material'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 interface UserMenuDropdownProps {
   anchorEl: HTMLElement | null
   onClose: () => void
   isLoggedIn: boolean
-  onLogout?: () => void
+  logout?: () => void
 }
 
-export default function UserMenuDropdown({ anchorEl, onClose, isLoggedIn, onLogout }: UserMenuDropdownProps) {
+export default function UserMenuDropdown({ anchorEl, onClose, isLoggedIn, logout }: UserMenuDropdownProps) {
   const open = Boolean(anchorEl)
   const menuRef = useRef<HTMLDivElement | null>(null)
-  const router = useRouter()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -42,19 +40,8 @@ export default function UserMenuDropdown({ anchorEl, onClose, isLoggedIn, onLogo
 
   async function handleLogout() {
     onClose()
-    try {
-      const res = await fetch('/api/logout', { method: 'POST' })
-      if (res.ok) {
-        onLogout?.() // <- atualiza o estado de login no pai
-        router.push('/')
-      } else {
-        console.error('Erro ao deslogar')
-      }
-    } catch (error) {
-      console.error('Erro ao deslogar', error)
-    }
+    logout?.()
   }
-
 
   return (
     <Popper open={open} anchorEl={anchorEl} placement="bottom-end" disablePortal sx={{ zIndex: 1200 }}>
