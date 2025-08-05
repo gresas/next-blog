@@ -1,23 +1,32 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Box,
   Container,
-  Typography,
   CircularProgress,
-  Button,
-  Stack,
 } from '@mui/material'
 import privilegeRoles from '../generated/helpers'
 import { useAuth } from '../context/AuthContext'
-import { useRouter } from 'next/navigation'
+import AccessDeniedPage from '../components/AccessDeniedPage'
+import UserSidebar from './UserSideBar'
+import UserNewsSection from './UserNewsSection'
+import UserEditSection from './UserEditSection'
+
 
 export default function UserPage() {
-  const { user } = useAuth()
+  const { user, isLoggedIn } = useAuth()
   const router = useRouter()
+  
+  const [selected, setSelected] = useState<'perfil' | 'editor'>('perfil')
   const [noticias, setNoticias] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
+  if (!isLoggedIn || !user) {
+    router.push('/login')
+    return null
+  }
 
   useEffect(() => {
     if (user?.id) {
@@ -38,51 +47,17 @@ export default function UserPage() {
   }
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h5" gutterBottom>
-        Olá, {user?.nome}
-      </Typography>
+    <Box sx={{ display: 'flex', minHeight: '80vh' }}>
+      <UserSidebar
+        selected={selected}
+        onSelect={setSelected}
+        isEditor={user && privilegeRoles.includes(user.role)}
+      />
 
-      {noticias.length === 0 ? (
-        <Box sx={{ mt: 6, textAlign: 'center' }}>
-          <Typography variant="body1" color="text.secondary">
-            Nenhuma notícia criada por você ainda.
-          </Typography>
-        </Box>
-      ) : (
-        <Stack spacing={2} sx={{ mt: 2 }}>
-          {noticias.map((noticia: any) => (
-            <Box
-              key={noticia.id}
-              sx={{
-                p: 2,
-                border: '1px solid #ccc',
-                borderRadius: 2,
-                cursor: 'pointer',
-              }}
-              onClick={() => router.push(`/noticia/${noticia.id}`)}
-            >
-              <Typography variant="subtitle1" fontWeight="bold">
-                {noticia.titulo}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Publicado em:{' '}
-                {new Date(noticia.firstPublishAt).toLocaleDateString()}
-              </Typography>
-            </Box>
-          ))}
-        </Stack>
-      )}
-
-      {user && privilegeRoles.includes(user.role) && (
-        <Button
-          variant="contained"
-          sx={{ mt: 4 }}
-          onClick={() => router.push('/editor')}
-        >
-          + Criar Notícia
-        </Button>
-      )}
-    </Container>
+      <Box sx={{ flex: 1 }}>
+        {selected === 'perfil' && <UserEditSection userId={user.id} />}
+        {selected === 'editor' && <UserNewsSection noticias={noticias} />}
+      </Box>
+    </Box>
   )
 }
