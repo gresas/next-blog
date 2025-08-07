@@ -1,27 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcrypt'
-import { PrismaClient } from '../../generated/prisma/client'
+import { PrismaClient } from '../../../generated/prisma/client'
 
 const prisma = new PrismaClient()
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req: NextRequest, res: NextResponse) {
-  const { nome, email, senha } = await req.json()
+  const { nome, email, userId } = await req.json()
 
-  if (!nome || !email || !senha) {
+  if (!nome || !email || !userId) {
     return NextResponse.json(
       { message: 'Campos obrigatórios não preenchidos' },
       { status: 400 }
     )
   }
   
-  if (!emailRegex.test(email)) {
-    return NextResponse.json(
-      { message: 'Email em formato inválido' },
-      { status: 400 }
-    )
-  }
-
   const existingUser = await prisma.usuario.findUnique({ where: { email } })
   if (existingUser) {
     return NextResponse.json(
@@ -30,19 +22,16 @@ export async function POST(req: NextRequest, res: NextResponse) {
     );
   }
 
-  // Improve salt strength
-  const senhaHash = await bcrypt.hash(senha, 10)
-  await prisma.usuario.create({
+  await prisma.usuario.update({
+    where: { id: userId },
     data: {
       nome,
-      email,
-      senhaHash,
-      role: 'USER',
+      email
     }
   })
 
   return NextResponse.json(
-    { message: 'Usuário criado com sucesso' },
+    { message: 'Usuário editado com sucesso' },
     { status: 201 }
   ) 
 }

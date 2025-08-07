@@ -1,21 +1,21 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import {
   Box,
-  Container,
-  Typography,
   CircularProgress,
-  Button,
-  Stack,
 } from '@mui/material'
-import privilegeRoles from '../generated/helpers'
-import { useAuth } from '../context/AuthContext'
-import { useRouter } from 'next/navigation'
+import ProtectedRoute from '@/app/context/ProtectedRoute'
+import privilegeRoles from '@/app/generated/helpers'
+import { useAuth } from '@/app/context/AuthContext'
+import UserSidebar from './UserSideBar'
+import UserNewsSection from './UserNewsSection'
+import UserEditSection from './UserEditSection'
+
 
 export default function UserPage() {
-  const { user } = useAuth()
-  const router = useRouter()
+  const { user, isLoggedIn } = useAuth()
+  
+  const [selected, setSelected] = useState<'perfil' | 'editor'>('perfil')
   const [noticias, setNoticias] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -29,60 +29,28 @@ export default function UserPage() {
     }
   }, [user?.id])
 
-  if (loading) {
+  if (isLoggedIn && loading) {
     return (
-      <Container sx={{ mt: 4 }}>
+      <Box display="flex" justifyContent="center" mt={10}>
         <CircularProgress />
-      </Container>
+      </Box>
     )
   }
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h5" gutterBottom>
-        Olá, {user?.nome}
-      </Typography>
+    <ProtectedRoute>
+      <Box sx={{ display: 'flex', minHeight: '80vh' }}>
+        <UserSidebar
+          selected={selected}
+          onSelect={setSelected}
+          isEditor={user && privilegeRoles.includes(user.role)}
+        />
 
-      {noticias.length === 0 ? (
-        <Box sx={{ mt: 6, textAlign: 'center' }}>
-          <Typography variant="body1" color="text.secondary">
-            Nenhuma notícia criada por você ainda.
-          </Typography>
+        <Box sx={{ flex: 1 }}>
+          {user && selected === 'perfil' && <UserEditSection userId={user.id} />}
+          {selected === 'editor' && <UserNewsSection noticias={noticias} />}
         </Box>
-      ) : (
-        <Stack spacing={2} sx={{ mt: 2 }}>
-          {noticias.map((noticia: any) => (
-            <Box
-              key={noticia.id}
-              sx={{
-                p: 2,
-                border: '1px solid #ccc',
-                borderRadius: 2,
-                cursor: 'pointer',
-              }}
-              onClick={() => router.push(`/noticia/${noticia.id}`)}
-            >
-              <Typography variant="subtitle1" fontWeight="bold">
-                {noticia.titulo}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Publicado em:{' '}
-                {new Date(noticia.firstPublishAt).toLocaleDateString()}
-              </Typography>
-            </Box>
-          ))}
-        </Stack>
-      )}
-
-      {user && privilegeRoles.includes(user.role) && (
-        <Button
-          variant="contained"
-          sx={{ mt: 4 }}
-          onClick={() => router.push('/editor')}
-        >
-          + Criar Notícia
-        </Button>
-      )}
-    </Container>
+      </Box>
+    </ProtectedRoute>
   )
 }

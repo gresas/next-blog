@@ -1,8 +1,8 @@
 'use client'
-
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import PasswordToggleAdornment from '../components/PasswordToggleAdornment'
+import { useFakeLoading } from '@/app/hooks/FakeLoading'
+import PasswordToggleAdornment from '@/app/components/PasswordToggleAdornment'
 import {
   Container,
   Typography,
@@ -17,6 +17,7 @@ const senhaSeguraRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/
 
 export default function CadastroPage() {
   const router = useRouter()
+  const loading = useFakeLoading(500)
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [touched, setTouched] = useState(false)
@@ -25,7 +26,7 @@ export default function CadastroPage() {
   const [showSenha, setShowSenha] = useState(false)
   const [showConfirmaSenha, setShowConfirmaSenha] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [submitLoading, setSubmitLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,8 +36,7 @@ export default function CadastroPage() {
       setError('As senhas não conferem')
       return
     }
-
-    setLoading(true)
+    setSubmitLoading(true)
     try {
       const res = await fetch('/api/cadastrar', {
         method: 'POST',
@@ -49,18 +49,26 @@ export default function CadastroPage() {
         throw new Error(data.message || 'Erro ao cadastrar')
       }
 
-      router.push('/login')
+      router.push('/login?from=/cadastrar')
     } catch (err: any) {
       setError(err.message)
     } finally {
-      setLoading(false)
+      setSubmitLoading(false)
     }
   }
 
   const isSenhaValida = senhaSeguraRegex.test(senha)
 
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" mt={10}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
   return (
-    <Container maxWidth="sm" sx={{ mt: 12 }}>
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
       <Typography variant="h4" gutterBottom>Cadastro</Typography>
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
         <TextField
@@ -70,7 +78,7 @@ export default function CadastroPage() {
           fullWidth
           required
           margin="normal"
-          disabled={loading}
+          disabled={submitLoading}
         />
         <TextField
           label="Email"
@@ -80,7 +88,7 @@ export default function CadastroPage() {
           fullWidth
           required
           margin="normal"
-          disabled={loading}
+          disabled={submitLoading}
         />
         <TextField
           label="Senha"
@@ -92,7 +100,7 @@ export default function CadastroPage() {
           required
           margin="normal"
           error={touched && !isSenhaValida}
-          disabled={loading}
+          disabled={submitLoading}
           helperText={
             touched && !isSenhaValida
               ? 'A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um símbolo.'
@@ -116,7 +124,7 @@ export default function CadastroPage() {
           fullWidth
           required
           margin="normal"
-          disabled={loading}
+          disabled={submitLoading}
           slotProps={{
             input: {endAdornment :(
               <PasswordToggleAdornment
@@ -131,11 +139,11 @@ export default function CadastroPage() {
           type="submit"
           variant="contained"
           color="primary"
-          disabled={loading || !isSenhaValida}
+          disabled={submitLoading || !isSenhaValida}
           fullWidth
           sx={{ mt: 2 }}
         >
-          {loading ? <CircularProgress size={24} /> : 'Cadastrar'}
+          {submitLoading ? <CircularProgress size={24} /> : 'Cadastrar'}
       </Button>
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>

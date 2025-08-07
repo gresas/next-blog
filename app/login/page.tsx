@@ -1,28 +1,39 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import PasswordToggleAdornment from '../components/PasswordToggleAdornment'
+import { useEffect } from 'react'
+import { useAuth } from '@/app/context/AuthContext'
+import { useRouter, useSearchParams } from 'next/navigation'
+import PasswordToggleAdornment from '@/app/components/PasswordToggleAdornment'
+import AlertMessage from '@/app/components/AlertMessage'
 import {
   Container,
   Typography,
   TextField,
   Button,
   Box,
-  Alert,
   CircularProgress,
 } from '@mui/material'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { isLoggedIn, loading } = useAuth()
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loginLoading, setLoginLoading] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
+  const from = searchParams.get('from') || '/'
+
+  useEffect(() => {
+    if (!loading && isLoggedIn) {
+      router.push('/')
+    }
+  }, [isLoggedIn, loading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setLoginLoading(true)
     setError(null)
 
     try {
@@ -42,12 +53,38 @@ export default function LoginPage() {
     } catch (err: any) {
       setError(err.message)
     } finally {
-      setLoading(false)
+      setLoginLoading(false)
     }
   }
 
+  if (loading || isLoggedIn) {
+    return (
+      <Box display="flex" justifyContent="center" mt={10}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
   return (
-    <Container maxWidth="sm" sx={{ mt: 12 }}>
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
+      {['/user','/editor'].includes(from) && (
+        <AlertMessage
+          message="Você precisa estar logado para acessar esta página."
+          severity="info"
+          animation="grow"
+          duration={5000}
+          onClose={() => setError(null)}
+        />
+      )}
+      {from == '/cadastrar' && (
+        <AlertMessage
+          message="Usuário criado com sucesso! Faça login para continuar."
+          severity="success"
+          animation="grow"
+          duration={0}
+          onClose={() => setError(null)}
+        />
+      )}
       <Typography variant="h4" gutterBottom>Login</Typography>
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
         <TextField
@@ -58,7 +95,7 @@ export default function LoginPage() {
           margin="normal"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          disabled={loading}
+          disabled={loginLoading}
         />
         <TextField
           label="Senha"
@@ -68,7 +105,7 @@ export default function LoginPage() {
           margin="normal"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
-          disabled={loading}
+          disabled={loginLoading}
           slotProps={{
             input: {endAdornment :(
               <PasswordToggleAdornment
@@ -83,16 +120,30 @@ export default function LoginPage() {
           type="submit"
           variant="contained"
           color="primary"
-          disabled={loading}
+          disabled={loginLoading}
           fullWidth
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
         >
-          {loading ? <CircularProgress size={24} /> : 'Entrar'}
+          {loginLoading ? <CircularProgress size={24} /> : 'Entrar'}
+        </Button>
+        <Button
+          type="button"
+          variant="outlined"
+          color="inherit"
+          onClick={() => router.push('/cadastrar')}
+          fullWidth
+          sx={{ mb: 1, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
+        >
+          Cadastrar-se
         </Button>
         {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
+          <AlertMessage
+            message={error}
+            severity="error"
+            animation="grow"
+            duration={3000}
+            onClose={() => setError(null)}
+          />
         )}
       </Box>
     </Container>
