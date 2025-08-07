@@ -1,7 +1,8 @@
 'use client'
+import React from 'react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/app/context/AuthContext'
+import { useAuth } from '../context/AuthContext'
 import {
   Container,
   TextField,    
@@ -11,9 +12,9 @@ import {
   Autocomplete,
   CircularProgress
 } from '@mui/material'
-import privilegeRoles from '@/app/generated/helpers'
-import ProtectedRoute from '@/app/context/ProtectedRoute'
-import AccessDeniedPage from '@/app/components/AccessDeniedPage'
+import privilegeRoles from '../generated/helpers'
+import ProtectedRoute from '../context/ProtectedRoute'
+import AccessDeniedPage from '../components/AccessDeniedPage'
 
 interface Editoria {
   id: number
