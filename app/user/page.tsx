@@ -1,15 +1,12 @@
 'use client'
-
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   Box,
-  Container,
   CircularProgress,
 } from '@mui/material'
-import privilegeRoles from '../generated/helpers'
-import { useAuth } from '../context/AuthContext'
-import AccessDeniedPage from '../components/AccessDeniedPage'
+import ProtectedRoute from '@/app/context/ProtectedRoute'
+import privilegeRoles from '@/app/generated/helpers'
+import { useAuth } from '@/app/context/AuthContext'
 import UserSidebar from './UserSideBar'
 import UserNewsSection from './UserNewsSection'
 import UserEditSection from './UserEditSection'
@@ -17,16 +14,10 @@ import UserEditSection from './UserEditSection'
 
 export default function UserPage() {
   const { user, isLoggedIn } = useAuth()
-  const router = useRouter()
   
   const [selected, setSelected] = useState<'perfil' | 'editor'>('perfil')
   const [noticias, setNoticias] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-
-  if (!isLoggedIn || !user) {
-    router.push('/login')
-    return null
-  }
 
   useEffect(() => {
     if (user?.id) {
@@ -38,26 +29,28 @@ export default function UserPage() {
     }
   }, [user?.id])
 
-  if (loading) {
+  if (isLoggedIn && loading) {
     return (
-      <Container sx={{ mt: 4 }}>
+      <Box display="flex" justifyContent="center" mt={10}>
         <CircularProgress />
-      </Container>
+      </Box>
     )
   }
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '80vh' }}>
-      <UserSidebar
-        selected={selected}
-        onSelect={setSelected}
-        isEditor={user && privilegeRoles.includes(user.role)}
-      />
+    <ProtectedRoute>
+      <Box sx={{ display: 'flex', minHeight: '80vh' }}>
+        <UserSidebar
+          selected={selected}
+          onSelect={setSelected}
+          isEditor={user && privilegeRoles.includes(user.role)}
+        />
 
-      <Box sx={{ flex: 1 }}>
-        {selected === 'perfil' && <UserEditSection userId={user.id} />}
-        {selected === 'editor' && <UserNewsSection noticias={noticias} />}
+        <Box sx={{ flex: 1 }}>
+          {user && selected === 'perfil' && <UserEditSection userId={user.id} />}
+          {selected === 'editor' && <UserNewsSection noticias={noticias} />}
+        </Box>
       </Box>
-    </Box>
+    </ProtectedRoute>
   )
 }

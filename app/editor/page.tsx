@@ -1,8 +1,7 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '@/app/context/AuthContext'
 import {
   Container,
   TextField,    
@@ -12,8 +11,9 @@ import {
   Autocomplete,
   CircularProgress
 } from '@mui/material'
-import privilegeRoles from '../generated/helpers'
-import AccessDeniedPage from '../components/AccessDeniedPage'
+import privilegeRoles from '@/app/generated/helpers'
+import ProtectedRoute from '@/app/context/ProtectedRoute'
+import AccessDeniedPage from '@/app/components/AccessDeniedPage'
 
 interface Editoria {
   id: number
@@ -35,11 +35,6 @@ export default function EditorNoticia() {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const { isLoggedIn, loading, user } = useAuth()
-
-  if (!isLoggedIn || !user) {
-    router.push('/login')
-    return null
-  }
 
   useEffect(() => {
     fetch('/api/editorias')
@@ -96,72 +91,74 @@ export default function EditorNoticia() {
     )
   }
 
-  if (!privilegeRoles.includes(user.role)) {
+  if (user && !privilegeRoles.includes(user.role)) {
     return (
       <AccessDeniedPage />
     )
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4, mb: 6, pt: 7 }}>
-      <Typography variant="h4" gutterBottom>
-        Criar Nova Notícia
-      </Typography>
-
-      {error && (
-        <Typography color="error" sx={{ mb: 2 }}>
-          {error}
+    <ProtectedRoute>
+      <Container maxWidth="sm" sx={{ mt: 4, mb: 6, pt: 7 }}>
+        <Typography variant="h4" gutterBottom>
+          Criar Nova Notícia
         </Typography>
-      )}
 
-      <TextField fullWidth label="Título" variant="outlined" value={titulo} onChange={e => setTitulo(e.target.value)} sx={{ mb: 2 }} />
-      <TextField fullWidth label="Autor" variant="outlined" value={autor} onChange={e => setAutor(e.target.value)} sx={{ mb: 2 }} />
-      <TextField fullWidth label="Linha de Suporte" variant="outlined" value={linhaSuporte} onChange={e => setLinhaSuporte(e.target.value)} sx={{ mb: 2 }} />
-      <TextField fullWidth label="Deck (Resumo)" variant="outlined" value={deck} onChange={e => setDeck(e.target.value)} sx={{ mb: 2 }} />
-
-      <Autocomplete
-        options={editorias}
-        getOptionLabel={(option) => option.nome}
-        value={editoria}
-        onChange={(_, value) => setEditoria(value)}
-        loading={loadingEditorias}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Editoria"
-            variant="outlined"
-            sx={{ mb: 2 }}
-            slotProps={{
-              input: {
-                ...params.InputProps,
-                endAdornment :(
-                <>
-                  {loadingEditorias ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-                )
-              },
-            }}
-          />
+        {error && (
+          <Typography color="error" sx={{ mb: 2 }}>
+            {error}
+          </Typography>
         )}
-      />
 
-      <TextField
-        fullWidth
-        label="Corpo da Notícia"
-        multiline
-        minRows={8}
-        variant="outlined"
-        value={corpo}
-        onChange={(e) => setCorpo(e.target.value)}
-        sx={{ mb: 3 }}
-      />
+        <TextField fullWidth label="Título" variant="outlined" value={titulo} onChange={e => setTitulo(e.target.value)} sx={{ mb: 2 }} />
+        <TextField fullWidth label="Autor" variant="outlined" value={autor} onChange={e => setAutor(e.target.value)} sx={{ mb: 2 }} />
+        <TextField fullWidth label="Linha de Suporte" variant="outlined" value={linhaSuporte} onChange={e => setLinhaSuporte(e.target.value)} sx={{ mb: 2 }} />
+        <TextField fullWidth label="Deck (Resumo)" variant="outlined" value={deck} onChange={e => setDeck(e.target.value)} sx={{ mb: 2 }} />
 
-      <Box display="flex" justifyContent="flex-end">
-        <Button variant="contained" color="primary" onClick={handleSubmit} disabled={submitting}>
-          {submitting ? 'Publicando...' : 'Publicar Notícia'}
-        </Button>
-      </Box>
-    </Container>
+        <Autocomplete
+          options={editorias}
+          getOptionLabel={(option) => option.nome}
+          value={editoria}
+          onChange={(_, value) => setEditoria(value)}
+          loading={loadingEditorias}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Editoria"
+              variant="outlined"
+              sx={{ mb: 2 }}
+              slotProps={{
+                input: {
+                  ...params.InputProps,
+                  endAdornment :(
+                  <>
+                    {loadingEditorias ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                  )
+                },
+              }}
+            />
+          )}
+        />
+
+        <TextField
+          fullWidth
+          label="Corpo da Notícia"
+          multiline
+          minRows={8}
+          variant="outlined"
+          value={corpo}
+          onChange={(e) => setCorpo(e.target.value)}
+          sx={{ mb: 3 }}
+        />
+
+        <Box display="flex" justifyContent="flex-end">
+          <Button variant="contained" color="primary" onClick={handleSubmit} disabled={submitting}>
+            {submitting ? 'Publicando...' : 'Publicar Notícia'}
+          </Button>
+        </Box>
+      </Container>
+    </ProtectedRoute>
   )
 }
