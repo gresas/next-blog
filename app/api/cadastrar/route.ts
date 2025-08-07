@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import { PrismaClient } from '../../generated/prisma/client'
 
 const prisma = new PrismaClient()
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req: NextRequest, res: NextResponse) {
   const { nome, email, senha } = await req.json()
@@ -14,6 +15,13 @@ export async function POST(req: NextRequest, res: NextResponse) {
     )
   }
   
+  if (!emailRegex.test(email)) {
+    return NextResponse.json(
+      { message: 'Email em formato inválido' },
+      { status: 400 }
+    )
+  }
+
   const existingUser = await prisma.usuario.findUnique({ where: { email } })
   if (existingUser) {
     return NextResponse.json(

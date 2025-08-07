@@ -67,7 +67,7 @@ export default function LoginPage() {
 
   return (
     <Container maxWidth="sm" sx={{ mt: 8 }}>
-      {from == '/user' || from == '/editor' && (
+      {['/user','/editor'].includes(from) && (
         <AlertMessage
           message="Você precisa estar logado para acessar esta página."
           severity="info"
@@ -122,9 +122,19 @@ export default function LoginPage() {
           color="primary"
           disabled={loginLoading}
           fullWidth
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
         >
           {loginLoading ? <CircularProgress size={24} /> : 'Entrar'}
+        </Button>
+        <Button
+          type="button"
+          variant="outlined"
+          color="inherit"
+          onClick={() => router.push('/cadastrar')}
+          fullWidth
+          sx={{ mb: 1, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
+        >
+          Cadastrar-se
         </Button>
         {error && (
           <AlertMessage
