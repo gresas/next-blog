@@ -34,7 +34,7 @@ export default function EditorNoticia() {
   const [loadingEditorias, setLoadingEditorias] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const { isLoggedIn, loading, user } = useAuth()
+  const { loading, user } = useAuth()
 
   useEffect(() => {
     fetch('/api/editorias')
@@ -99,7 +99,7 @@ export default function EditorNoticia() {
 
   return (
     <ProtectedRoute>
-      <Container maxWidth="sm" sx={{ mt: 4, mb: 6, pt: 7 }}>
+      <Container maxWidth="sm" sx={{ mt: 8, mb: 6 }}>
         <Typography variant="h4" gutterBottom>
           Criar Nova Notícia
         </Typography>
