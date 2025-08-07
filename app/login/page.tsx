@@ -3,14 +3,14 @@ import { useState } from 'react'
 import { useEffect } from 'react'
 import { useAuth } from '@/app/context/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
-import PasswordToggleAdornment from '../components/PasswordToggleAdornment'
+import PasswordToggleAdornment from '@/app/components/PasswordToggleAdornment'
+import AlertMessage from '@/app/components/AlertMessage'
 import {
   Container,
   Typography,
   TextField,
   Button,
   Box,
-  Alert,
   CircularProgress,
 } from '@mui/material'
 
@@ -29,7 +29,7 @@ export default function LoginPage() {
     if (!loading && isLoggedIn) {
       router.push('/')
     }
-  }, [isLoggedIn, loading, from, router])
+  }, [isLoggedIn, loading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,7 +49,7 @@ export default function LoginPage() {
       }
 
       // Login ok, redireciona para home
-      router.push(from)
+      router.push('/')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -66,11 +66,24 @@ export default function LoginPage() {
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 12 }}>
-      {from !== '/' && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          Você precisa estar logado para acessar esta página.
-        </Alert>
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
+      {from == '/user' || from == '/editor' && (
+        <AlertMessage
+          message="Você precisa estar logado para acessar esta página."
+          severity="info"
+          animation="grow"
+          duration={5000}
+          onClose={() => setError(null)}
+        />
+      )}
+      {from == '/cadastrar' && (
+        <AlertMessage
+          message="Usuário criado com sucesso! Faça login para continuar."
+          severity="success"
+          animation="grow"
+          duration={0}
+          onClose={() => setError(null)}
+        />
       )}
       <Typography variant="h4" gutterBottom>Login</Typography>
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
@@ -114,9 +127,13 @@ export default function LoginPage() {
           {loginLoading ? <CircularProgress size={24} /> : 'Entrar'}
         </Button>
         {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
+          <AlertMessage
+            message={error}
+            severity="error"
+            animation="grow"
+            duration={3000}
+            onClose={() => setError(null)}
+          />
         )}
       </Box>
     </Container>
