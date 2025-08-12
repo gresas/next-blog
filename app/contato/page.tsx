@@ -1,5 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react'
+import React from 'react'
+import { useState } from 'react'
 import { useFakeLoading } from '../hooks/FakeLoading'
 import {
   Container,

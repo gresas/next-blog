@@ -1,4 +1,5 @@
 'use client'
+import React from 'react'
 import { ThemeProvider, CssBaseline, createTheme } from '@mui/material'
 import { useEffect } from 'react'
 import Navbar from './components/navbar/Navbar'
