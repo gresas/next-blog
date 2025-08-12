@@ -1,4 +1,5 @@
 'use client'
+import React from 'react'
 import { Box, Container, Typography, IconButton, Stack } from '@mui/material'
 import InstagramIcon from '@mui/icons-material/Instagram'
 import GitHubIcon from '@mui/icons-material/GitHub'

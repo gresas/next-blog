@@ -1,6 +1,6 @@
 // components/ProtectedRoute.tsx
 'use client'
-
+import React from 'react'
 import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from './AuthContext'
