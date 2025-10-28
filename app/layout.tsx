@@ -1,18 +1,11 @@
 'use client'
 import React from 'react'
 import { ThemeProvider, CssBaseline, createTheme } from '@mui/material'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import Navbar from './components/navbar/Navbar'
 import Footer from './components/Footer'
 import { AuthProvider } from './context/AuthContext'
 
-const theme = createTheme({
-  palette: {
-    primary: { main: '#0057B8' },
-    secondary: { main: '#FF5C00' },
-    background: { default: '#F5F5F5' },
-  },
-})
 
 export function TokenRefresher() {
   useEffect(() => {
@@ -37,6 +30,17 @@ export function TokenRefresher() {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const theme = useMemo(() => 
+    createTheme({
+      palette: {
+        primary: { main: '#0057B8' },
+        secondary: { main: '#FF5C00' },
+        background: { default: '#F5F5F5' },
+      },
+    }),
+    []
+  )
+  
   return (
     <html lang="pt-br">
       <body style={{ margin: 0 }}>

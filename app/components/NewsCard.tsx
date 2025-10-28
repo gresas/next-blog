@@ -5,36 +5,27 @@ import {
   CardContent,
   Typography
 } from '@mui/material'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 
-type Noticia = {
-  id: string
-  titulo: string
-  deck: string
-  updatedAt: string
-  createdAt: string
-  linhaSuporte: string
-  firstPublishAt: string
-  autor: string
-  createdBy?: {
-    nome: string
+interface Props {
+  noticia: {
+    id: string
+    titulo: string
+    deck: string
+    updatedAt: string
+    createdAt: string
+    linhaSuporte: string
+    firstPublishAt: string
+    autor: string
+    createdBy?: {
+      nome: string
+    }
   }
 }
 
-function formatarData(data: string) {
-  const d = new Date(data)
-  return d.toLocaleDateString('pt-BR')
-}
 
-export default function NoticiaCard({ noticia }: { noticia: Noticia }) {
-  const router = useRouter()
-
-  const isAtualizado = noticia.updatedAt !== noticia.firstPublishAt
-  const dataLabel = isAtualizado ? 'Atualizado em' : 'Publicado em'
-  const dataValue = isAtualizado ? noticia.updatedAt : noticia.firstPublishAt
-
+function NewsCardComponent({ noticia } : Props) {
   return (
     <Link href={`/noticia/${noticia.id}`} passHref style={{ textDecoration: 'none' }}>
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -54,13 +45,14 @@ export default function NoticiaCard({ noticia }: { noticia: Noticia }) {
             </Typography>
             )}
       </CardContent>
-
-      {/* <CardActions>
-        <Button size="small" onClick={() => router.push(`/noticia/${noticia.id}`)}>
-          Ler mais
-        </Button>
-      </CardActions> */}
     </Card>
     </Link>
   )
 }
+
+function formatarData(data: string) {
+  const d = new Date(data)
+  return d.toLocaleDateString('pt-BR')
+}
+
+export default React.memo(NewsCardComponent)
