@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { usePathname } from 'next/navigation'
 import { useAuth } from '../../context/AuthContext'
 import {
   AppBar,
@@ -14,46 +15,71 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import MainMenuDropdown from './MainMenuDropdown'
 import UserMenuDropdown from './UserMenuDropdown'
 
-export default function Navbar() {
+
+export function useHideOnScroll(debounce = 100) {
   const [show, setShow] = useState(true)
+  const lastScrollY = useRef<number>(0)
+  const timeoutRef = useRef<number | null>(null)
+  const pathname = usePathname()
+
+  // Reset on route change so we don't inherit previous hide state
+  useEffect(() => {
+    lastScrollY.current = typeof window !== 'undefined' ? window.scrollY : 0
+    setShow(true)
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+  }, [pathname])
+
+  const handleScroll = useCallback(() => {
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current)
+    }
+    timeoutRef.current = window.setTimeout(() => {
+      const current = window.scrollY
+      if (current === 0) {
+        setShow(true)
+      } else if (current < lastScrollY.current) {
+        setShow(true)
+      } else if (current > lastScrollY.current) {
+        setShow(false)
+      }
+      lastScrollY.current = current
+    }, debounce) as unknown as number
+  }, [debounce])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [handleScroll])
+
+  return show
+}
+
+
+export default function Navbar() {
+  // use isolated hook for scroll/hide logic
+  const show = useHideOnScroll(100)
+
   const { isLoggedIn, logout } = useAuth()
-  const lastScrollY = useRef(0)
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
 
   // Dropdown de menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [userAnchorEl, setUserAnchorEl] = useState<null | HTMLElement>(null)
 
-  useEffect(() => {
-    function handleScroll() {
-      if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
-
-      debounceTimeout.current = setTimeout(() => {
-        const currentScrollY = window.scrollY
-        if (currentScrollY === 0) {
-          setShow(true)
-        } else if (currentScrollY < lastScrollY.current) {
-          setShow(true)
-        } else if (currentScrollY > lastScrollY.current) {
-          setShow(false)
-        }
-        lastScrollY.current = currentScrollY
-      }, 100)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
-    }
-  }, [])
-
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(anchorEl ? null : event.currentTarget)
+    setAnchorEl(prev => (prev ? null : event.currentTarget))
   }
 
   const handleUserClick = (event: React.MouseEvent<HTMLElement>) => {
-    setUserAnchorEl(userAnchorEl ? null : event.currentTarget)
+    setUserAnchorEl(prev => (prev ? null : event.currentTarget))
   }
 
   return (
@@ -75,16 +101,14 @@ export default function Navbar() {
           </IconButton>
 
           {/* Ícone do usuário (só se logado) */}
-          {(
-            <IconButton
-              onClick={handleUserClick}
-              sx={{ borderRadius: 1 }}
-            >
-              <Avatar sx={{ bgcolor: 'secondary.main' }}>
-                <AccountCircleIcon />
-              </Avatar>
-            </IconButton>
-          )}
+          <IconButton
+            onClick={handleUserClick}
+            sx={{ borderRadius: 1 }}
+          >
+            <Avatar sx={{ bgcolor: 'secondary.main' }}>
+              <AccountCircleIcon />
+            </Avatar>
+          </IconButton>
         </Toolbar>
 
         {/* Dropdowns */}

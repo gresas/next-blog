@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -98,6 +98,29 @@ export default function EditorNoticia() {
     )
   }
 
+  const renderEditoriaInput = useCallback((params: any, loadingEditorias: boolean) => {
+    // create stable endAdornment contents
+    return (
+      <TextField
+          {...params}
+          label="Editoria"
+          variant="outlined"
+          sx={{ mb: 2 }}
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              endAdornment :(
+              <>
+                {loadingEditorias ? <CircularProgress color="inherit" size={20} /> : null}
+                {params.InputProps.endAdornment}
+              </>
+              )
+            },
+          }}
+        />
+      )
+  }, [])
+
   return (
     <ProtectedRoute>
       <Container maxWidth="sm" sx={{ mt: 8, mb: 6 }}>
@@ -122,25 +145,7 @@ export default function EditorNoticia() {
           value={editoria}
           onChange={(_, value) => setEditoria(value)}
           loading={loadingEditorias}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Editoria"
-              variant="outlined"
-              sx={{ mb: 2 }}
-              slotProps={{
-                input: {
-                  ...params.InputProps,
-                  endAdornment :(
-                  <>
-                    {loadingEditorias ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </>
-                  )
-                },
-              }}
-            />
-          )}
+          renderInput={(params) => renderEditoriaInput(params, loadingEditorias)}
         />
 
         <TextField
