@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Role } from '../generated/prisma/client'
 
@@ -30,9 +30,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Verifica autenticação sempre que o path mudar
   useEffect(() => {
+    let mounted = true
     const checkAuth = async () => {
       try {
         const res = await fetch('/api/me')
+        if (!mounted) return
         if (res.ok) {
           const data = await res.json()
           setUser(data)
@@ -45,28 +47,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null)
         setIsLoggedIn(false)
       } finally {
-        setLoading(false)
+        if (mounted) setLoading(false)
       }
     }
 
     checkAuth()
+    return () => { mounted = false }
   }, [pathname])
 
-  const login = async () => {
-    // Depois do login via /api/login, apenas atualiza o contexto
+  const login = useCallback(async () => {
     await router.refresh()
-  }
+  }, [router])
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await fetch('/api/logout', { method: 'POST' })
     setUser(null)
     setIsLoggedIn(false)
     router.push('/')
     await router.refresh()
-  }
+  }, [router])
+
+  // Saving the context value so consumers only re-render when relevant values change
+  const value = useMemo(() => ({
+    isLoggedIn,
+    user,
+    loading,
+    login,
+    logout,
+  }), [isLoggedIn, user, loading, login, logout])
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, loading, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )
